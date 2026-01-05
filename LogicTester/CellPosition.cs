@@ -13,5 +13,7 @@ namespace LogicTester
             this.row = row;
             this.column = column;
         }
+
+        public 
     }
 }

@@ -4,7 +4,7 @@ namespace LogicTester
     {
         public Cell[,,] cellList = new Cell[6, 3, 3];
         public Cube(){
-            
+            createCells();
         }
 
         public void createCells()
@@ -20,6 +20,15 @@ namespace LogicTester
                         }
                 }
             }
+        }
+
+        public Cell GetCell(CellPosition position)
+        {
+            // Transforming the face to integer
+            int faceIndex = (int)position.face;
+            
+            // Return the cell based on the list
+            return cellList[faceIndex, position.row, position.column];
         }
     }
 }
