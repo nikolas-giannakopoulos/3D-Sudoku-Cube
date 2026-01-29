@@ -117,7 +117,7 @@
 
 .profile-modal {
     position: fixed;
-    top: 50px;
+    top: 55px;
     right: 20px;
     width: 140px;
     background: rgba(26, 26, 26, 0.6);
@@ -221,6 +221,9 @@
 .number-btn {
     aspect-ratio: 1;
     padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: transparent;
     border: 1px solid var(--color-border);
     border-radius: 6px;
@@ -292,6 +295,30 @@
 
 .action-btn:hover svg {
     transform: scale(1.1);
+}
+
+.undo-btn:hover {
+    border-color: #3B82F6 !important;
+}
+
+.undo-btn:hover svg {
+    color: #3B82F6;
+}
+
+.eraser-btn:hover {
+    border-color: #EC4899 !important;
+}
+
+.eraser-btn:hover svg {
+    color: #EC4899;
+}
+
+.hint-btn:hover {
+    border-color: #EAB308 !important;
+}
+
+.hint-btn:hover svg {
+    color: #EAB308;
 }
 
 .extra-buttons {

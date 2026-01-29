@@ -3,6 +3,7 @@ export interface ProfileModalProps {
     onClose: () => void;
     className?: string;
 }
+
 export const ProfileModal = ({ isOpen, onClose, className }: ProfileModalProps) => {
     if (!isOpen) return null;
     return (

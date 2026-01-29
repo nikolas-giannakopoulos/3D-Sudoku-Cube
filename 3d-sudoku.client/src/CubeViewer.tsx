@@ -1,21 +1,138 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, useGLTF } from '@react-three/drei';
-import { useState, Suspense } from 'react';
+import { OrbitControls, useGLTF, Clone, Center } from '@react-three/drei';
+import { useState, Suspense, useEffect } from 'react';
 import { MdLeaderboard } from 'react-icons/md';
 import { LuRefreshCw, LuUndo2, LuEraser, LuLightbulb, LuSettings, LuCircleHelp } from 'react-icons/lu';
 import { FaGithub } from 'react-icons/fa';
 import { handleGithub, handleHowToPlay, handleSettings } from './extraHandlers';
 import { ProfileModal } from './profileModal';
 import './UI.css';
+import type { Object3D } from 'three';
 
-function CubeModel() {
-    const { scene } = useGLTF('/cube.glb');
-    return <primitive object={scene} />;
+function CubeModel({
+    selectedNumber,
+    mockBoardData,
+    setMockBoardData
+}: {
+    selectedNumber: number | 'eraser' | null;
+    mockBoardData: { id: string; value: number }[];
+    setMockBoardData: React.Dispatch<React.SetStateAction<{ id: string; value: number }[]>>;
+}) {
+    // timestamp to force reload, or just a version number
+    const { scene, nodes } = useGLTF('/cube.glb');
+
+    // Hide the original asset meshes so they don't appear in their default export location
+    // We only want to show them where we explicitly place them
+    useEffect(() => {
+        Object.keys(nodes).forEach(nodeName => {
+            if (nodeName.startsWith('Asset_Num_')) {
+                nodes[nodeName].visible = false;
+            }
+        });
+    }, [nodes]);
+
+    // Mock data for demonstration - this will eventually come from the backend
+
+    return (
+        <group>
+            <primitive
+                object={scene}
+                onClick={(e: any) => {
+                    e.stopPropagation();
+                    const clickedMesh = e.object;
+                    const parentGroup = clickedMesh.parent;
+                    if (parentGroup) {
+                        console.log('Clicked Cell Name:', parentGroup.name);
+                    }
+                    const cellID = e.object.parent?.name;
+                    if (cellID) {
+                        const cellWithNumber = mockBoardData.find(c => c.id == cellID);
+                        if (selectedNumber === 'eraser' && cellWithNumber) {
+                            setMockBoardData(prev => prev.filter(c => c.id !== cellID));
+                        }
+                        else if (typeof selectedNumber === 'number') {
+                            if (cellWithNumber) {
+                                setMockBoardData(prev => prev.map(data =>
+                                    data.id === cellID
+                                        ? { ...data, value: selectedNumber }
+                                        : data
+                                ));
+                            }
+                            else {
+                                setMockBoardData(prev => [...prev, { id: cellID, value: selectedNumber }]);
+                            }
+                        }
+                    }
+
+                }
+                }
+            />
+            {mockBoardData.map((data) => {
+                const cellNode = nodes[data.id];
+                const assetNode = nodes[`Asset_Num_${data.value}`];
+
+                if (!cellNode || !assetNode) return null;
+                let addPosX = 0, addPosY = 0, addPosZ = 0, addRotX = 0, addRotY = 0, addRotZ = 0;
+                if (cellNode.name.startsWith('Front')) {
+                    addPosZ = -0.38;
+                    addRotX = Math.PI;
+                    addRotZ = Math.PI;
+                }
+                if (cellNode.name.startsWith('Back')) {
+                    addPosZ = 0.38;
+                }
+                if (cellNode.name.startsWith('Left')) {
+                    addPosX = 0.38;
+                    addRotY = Math.PI / 2;
+                }
+                if (cellNode.name.startsWith('Right')) {
+                    addPosX = -0.38;
+                    addRotY = - Math.PI / 2;
+                }
+                if (cellNode.name.startsWith('Top')) {
+                    addPosY = 0.38;
+                    addRotX = Math.PI / 2;
+                    addRotY = Math.PI;
+                }
+                if (cellNode.name.startsWith('Bottom')) {
+                    addPosY = -0.38;
+                    addRotX = Math.PI / 2;
+                    addRotZ = Math.PI;
+                }
+                return (
+                    <Center
+                        key={data.id}
+                        position={[
+                            cellNode.position.x + addPosX,
+                            cellNode.position.y + addPosY,
+                            cellNode.position.z + addPosZ,
+                        ]}
+                        rotation={[addRotX, addRotY, addRotZ]}
+                    >
+                        <Clone
+                            object={assetNode}
+                            visible={true}
+                        />
+                    </Center>
+                );
+            })}
+        </group>
+    );
 }
+
+function CreateNumber(side: string, cellNode: Object3D,) {
+    // mockBoard
+}
+
 
 function CubeViewer() {
 
     const [selectedNumber, setSelectedNumber] = useState<number | 'eraser' | null>(null);
+    const [mockBoardData, setMockBoardData] = useState([
+        { id: 'Left_1_2', value: 2 },
+        { id: 'Bottom_1_2', value: 4 },
+        { id: 'Top_1_1', value: 9 },
+    ]);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const handleEraserSelect = () => {
         if (selectedNumber != 'eraser') {
@@ -83,16 +200,16 @@ function CubeViewer() {
             <div className="right-panel-2">
                 <h2>Actions</h2>
                 <div className="action-buttons">
-                    <button className="action-btn" title="Undo">
+                    <button className="action-btn undo-btn" title="Undo">
                         <LuUndo2 size={20} />
                     </button>
-                    <button className={`action-btn ${selectedNumber === 'eraser' ? 'selected' : ''}`}
+                    <button className={`action-btn eraser-btn ${selectedNumber === 'eraser' ? 'selected' : ''}`}
                         onClick={handleEraserSelect}
                         title="Erase"
                     >
                         <LuEraser size={20} />
                     </button>
-                    <button className="action-btn" title="Hint">
+                    <button className="action-btn hint-btn" title="Hint">
                         <LuLightbulb size={20} />
                     </button>
                 </div>
@@ -111,15 +228,23 @@ function CubeViewer() {
                     </button>
                 </div>
             </div>
-
             {/* 3D Canvas */}
             <Canvas camera={{ position: [5, 5, 5], fov: 50 }}>
                 <ambientLight intensity={0.5} />
                 <directionalLight position={[10, 10, 5]} intensity={1} />
                 <directionalLight position={[-10, -10, -5]} intensity={0.5} />
                 <Suspense fallback={null}>
-                    <CubeModel />
+                    <CubeModel
+                        selectedNumber={selectedNumber}
+                        mockBoardData={mockBoardData}
+                        setMockBoardData={setMockBoardData}
+                    />
                 </Suspense>
+                <CubeModel
+                    selectedNumber={selectedNumber}
+                    mockBoardData={mockBoardData}
+                    setMockBoardData={setMockBoardData}
+                />
                 <OrbitControls
                     enableDamping
                     dampingFactor={0.05}

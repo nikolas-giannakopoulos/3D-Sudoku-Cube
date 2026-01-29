@@ -36,3 +36,4 @@ C:\Users\Nikolas\Desktop\Projects\3D-Sudoku\3D-Sudoku.Server\obj\Debug\net8.0\re
 C:\Users\Nikolas\Desktop\Projects\3D-Sudoku\3D-Sudoku.Server\obj\Debug\net8.0\3D-Sudoku.Server.pdb
 C:\Users\Nikolas\Desktop\Projects\3D-Sudoku\3D-Sudoku.Server\obj\Debug\net8.0\3D-Sudoku.Server.genruntimeconfig.cache
 C:\Users\Nikolas\Desktop\Projects\3D-Sudoku\3D-Sudoku.Server\obj\Debug\net8.0\ref\3D-Sudoku.Server.dll
+C:\Users\Nikolas\Desktop\Projects\3D-Sudoku\3D-Sudoku.Server\obj\Debug\net8.0\3D-Sudoku.Server.sourcelink.json
